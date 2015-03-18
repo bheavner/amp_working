@@ -37,7 +37,7 @@ counts <- read.table(localCountFilePath, header = TRUE, stringsAsFactors = FALSE
 #PROBLEM: - an rTGMinus sample
 #in count data, sample “LP62_4”
 #in covariates, sample “LP_62_4”
-# so change column name in counts
+# for now, change column name in counts - TODO: fix covariates file
 colnames(counts)[1] <- "LP_62_4"
 
 
