@@ -1,4 +1,4 @@
-# Goal: DE analysis of JNPL3 Tau mice (transgenic vs wild type).
+# Goal: DE analysis of JNPL3 Tau mice (transgenic (+) vs wild type (-) ).
 
 # subgoals: 
 # impact of more or less stringent criteria (particularly removing low readcount and dispersion models)?
@@ -136,19 +136,22 @@ topTen <- rownames(topTags(de.tgw, n = 10))
 toPlot <- d[topTen] #10 rows, 24 columns
 top <- topTags(de.tgw, n=50)
 
-# get gene names for x axis labels
+# get gene names for x axis labels -- ORDER ISN'T PRESERVED FROM BIOMART QURY!
 ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
-geneNames <- getBM("external_gene_name", 
+geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"), 
                    filters = "ensembl_gene_id", 
                    values = rownames(top)[1:10], 
                    ensembl)
+
+# get label order right for plot
+labels <- geneNames$external_gene_name[(order(match(geneNames$ensembl_gene_id, rownames(top)[1:10])))]
 
 # munge to use with ggplot and plot
 test  <- data.frame(toPlot$samples$group, t(toPlot$counts))
 toPlot2 <- melt(test)
 ggplot(toPlot2, aes(factor(variable), value)) + 
   geom_boxplot(aes(fill = toPlot.samples.group)) +
-  scale_x_discrete(labels = geneNames[1:10, ])
+  scale_x_discrete(labels = labels)
 
 
 
@@ -189,23 +192,27 @@ top <- topTags(de_common, n=50)
 
 # get gene names for x axis labels
 ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
-geneNames <- getBM("external_gene_name", 
+geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"), 
                    filters = "ensembl_gene_id", 
                    values = rownames(top)[1:10], 
                    ensembl)
+
+# get label order right for plot
+labels <- geneNames$external_gene_name[(order(match(geneNames$ensembl_gene_id, rownames(top)[1:10])))]
 
 # munge to use with ggplot and plot
 test  <- data.frame(toPlot$samples$group, t(toPlot$counts))
 toPlot2 <- melt(test)
 ggplot(toPlot2, aes(factor(variable), value)) + 
   geom_boxplot(aes(fill = toPlot.samples.group)) +
-  scale_x_discrete(labels = geneNames[1:10, ])
+  scale_x_discrete(labels = labels)
 
 
 # THIRD, glm EDGER ANALYSIS WITH glmLRT TEST
-fit <- glmFit(d2, design.mat) # Andrew used fit <- glmFit(d2, design.mat, dispersion=dge$tagwise.dispersion)
-# de_glm  <- glmLRT(fit, coef = 2) # DE with GLM dispersion estimate with GLMRT test
- de_glm  <- glmLRT(fit, contrast=c(1,-1)) # Andrew's version
+fit <- glmFit(d2, design.mat) 
+# Andrew used fit <- glmFit(d2, design.mat, dispersion=dge$tagwise.dispersion) but since "If NULL will be extracted from y, with order of precedence: tagwise dispersion, trended dispersions, common dispersion.", I'll leave it out and let it get it from d2.
+de_glm  <- glmLRT(fit, contrast=c(-1,1)) # -1*JNPL3Minus 1*JNPL3Plus 
+#so... does this mean a positive LR means transgenic (JNPL3Plus) is higher expression than WT (JNPL3Minus), or lower?
 
 summary(decideTestsDGE(de_glm, p.value=0.01))
 #[,1]
@@ -224,6 +231,9 @@ topTags(de_glm)
 #ENSMUSG00000004187 -0.2979300  7.847129 12.543855 3.975113e-04 2.236823e-01
 #ENSMUSG00000025780  0.6013726  7.271208 12.404182 4.283733e-04 2.236823e-01
 #ENSMUSG00000061740  0.5970873  6.940286 10.106146 1.477756e-03 6.614016e-01
+#ENSMUSG00000024164  0.9961478  6.799560  9.496849 2.058251e-03 6.975576e-01
+#ENSMUSG00000053702  0.2586839  7.857723  9.400092 2.169745e-03 6.975576e-01
+#ENSMUSG00000027479  0.3252234  7.901499  9.087314 2.573886e-03 6.975576e-01
 
 # box plot of top differentially expressed genes across samples
 topTen <- rownames(topTags(de_glm, n = 10))
@@ -232,27 +242,34 @@ top <- topTags(de_glm, n=50)
 
 # get gene names for x axis labels
 ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
-geneNames <- getBM("external_gene_name", 
+geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"), 
                    filters = "ensembl_gene_id", 
                    values = rownames(top)[1:10], 
                    ensembl)
+
+# get label order right for plot
+labels <- geneNames$external_gene_name[(order(match(geneNames$ensembl_gene_id, rownames(top)[1:10])))]
 
 # munge to use with ggplot and plot
 test  <- data.frame(toPlot$samples$group, t(toPlot$counts))
 toPlot2 <- melt(test)
 ggplot(toPlot2, aes(factor(variable), value)) + 
   geom_boxplot(aes(fill = toPlot.samples.group)) +
-  scale_x_discrete(labels = geneNames[1:10, ])
+  scale_x_discrete(labels = labels)
 
-
-## FINALLY,
-## Build summary table with desired outputs
-top <- topTags(de_glm, n=50)
+## FINALLY, Build summary table with desired outputs
+top <- data.frame(topTags(de_glm, n=99)) # the 100th isn't in ensembl, so fix later..
 
 ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
-geneNames <- getBM("external_gene_name", filters = "ensembl_gene_id", values = rownames(top), ensembl)
+geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"), 
+                   filters = "ensembl_gene_id", 
+                   values = rownames(top), 
+                   ensembl)
 
-top <- cbind(top, geneNames)
+# get label order right
+names <- geneNames$external_gene_name[(order(match(geneNames$ensembl_gene_id, rownames(top))))]
+
+top <- cbind(top, names)
 colnames(top)[6] <- "Gene_Name"
 
 ## add mean gene level, SD, kurtosis, 95% CI of effect size or SD of effect size to summary table
@@ -268,3 +285,6 @@ colnames(top)[8] <- "Count_Std_Dev"
 kurtosises  <- apply(d2$counts[rownames(top), ], 1, kurtosis)
 top <- cbind(top, kurtosises)
 colnames(top)[9] <- "Count_Kurtosis"
+
+write.table(top, file="JNPL3_tg_vs_wt.tsv", quote=F)
+
