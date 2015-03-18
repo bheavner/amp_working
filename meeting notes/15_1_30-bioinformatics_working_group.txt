@@ -1,0 +1,15 @@
+public release coming 2/16
+
+much work to be done to make it more globally accessible
+
+Mayo data:
+are there additional annotation files?
+James: not sure. What’s wrong with variable refs?
+Ben L: want good column header definitions; sparse metadata. Will follow up specifically
+
+Can’t release age > 90 (HIPPA), so that changes data.
+
+Need to get clinical data organized for public release
+
+Good to aggregate publication info for data sets - how to extract info from Mayo data papers (Nil and Steve)
+

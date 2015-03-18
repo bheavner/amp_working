@@ -1,0 +1,31 @@
+2/27 AMP AD bioinformatics WG call
+
+first public release is now scheduled for March 4
+public data portal walkthrough (starting from www.synapse.org/#!Synapse:syn2580853
+
+Note: next release looks like it’s May 2015 (then one in August 2015)
+
+Next couple weeks: schedule tutorial on how to define provenance/annotation
+
+Data must be deposited 6 weeks before release (so mid April)
+
+We’re up to release MayoBB RNA-seq. What’s its status? (Mayo Brain Bank)
+Status of MayoEGWAS eSNP results? - Ben L
+
+Genotype imputation:
+Mayo pipeline needs to be rerun (be sure to coordinate with  - Emory?)
+
+Lilly has done, found issues. Post-processing important; easy to lose haplotype info if run with incorrect flags
+
+Finally, analysis plans:
+Ley - phil putting together RNAseq analysis group ROSMap. Timeline or analysis?
+unknown for now
+
+Something that would be useful: put DE analysis in synapse?
+BL: pipeline and results would be great. And can control sharing settings.
+
+Hope to build on each others’ studies without interference as far as publications
+
+Ming Wei - Mt Saini analysis status? - Working on, will update analysis plans
+
+

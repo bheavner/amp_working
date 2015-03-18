@@ -1,0 +1,11 @@
+1/26/14 chat with Ben L and James
+
+amp-ad
+mute: *6, unmute: #6
+
+synapse id is important
+everything uploaded has a unique synapse id
+
+want to finish Ben’s ISBUFLMayoFebruaryRelease.xlsx doc for release (esp. numbs).
+
+if no ref, generate text from grant
