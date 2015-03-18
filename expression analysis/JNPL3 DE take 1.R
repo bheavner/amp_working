@@ -204,29 +204,26 @@ ggplot(toPlot2, aes(factor(variable), value)) +
 
 # THIRD, glm EDGER ANALYSIS WITH glmLRT TEST
 fit <- glmFit(d2, design.mat) # Andrew used fit <- glmFit(d2, design.mat, dispersion=dge$tagwise.dispersion)
-de_glm  <- glmLRT(fit, coef = 2) # DE with GLM dispersion estimate with GLMRT test
-
-#de_glm  <- glmLRT(fit, contrast=c(1,-1,0)) # Andrew's version - doesn't work for me
+# de_glm  <- glmLRT(fit, coef = 2) # DE with GLM dispersion estimate with GLMRT test
+ de_glm  <- glmLRT(fit, contrast=c(1,-1)) # Andrew's version
 
 summary(decideTestsDGE(de_glm, p.value=0.01))
 #[,1]
-#-1 3133
-#0     0
+#-1    1
+#0  3132
 #1     0
 
 topTags(de_glm)
 # Look at DE with glmFit.
-#Coefficient:  JNPL3Minus 
-#logFC   logCPM       LR PValue FDR
-#ENSMUSG00000024998 -13.48575 6.758922 2214.383      0   0
-#ENSMUSG00000059602 -13.48327 6.633828 1781.801      0   0
-#ENSMUSG00000068735 -13.41580 6.638248 1770.110      0   0
-#ENSMUSG00000024816 -13.40593 6.803815 2041.364      0   0
-#ENSMUSG00000061740 -13.39296 6.940286 1634.186      0   0
-#ENSMUSG00000029765 -13.38953 6.653501 1844.233      0   0
-#ENSMUSG00000039474 -13.35474 6.795300 2883.819      0   0
-
-# why all 0 PValue and 0 FDR? Seems like I may need a different test?
+#Coefficient:  -1*JNPL3Minus 1*JNPL3Plus 
+#logFC    logCPM        LR       PValue          FDR
+#ENSMUSG00000061808 -5.7919834  7.346404 32.212142 1.382243e-08 4.330566e-05
+#ENSMUSG00000042109 -0.9310217  7.857690 17.670991 2.626011e-05 4.113646e-02
+#ENSMUSG00000013275  0.4216278  7.707029 15.571870 7.942754e-05 8.294882e-02
+#ENSMUSG00000079037  0.7948759 10.942642 13.563288 2.306527e-04 1.806587e-01
+#ENSMUSG00000004187 -0.2979300  7.847129 12.543855 3.975113e-04 2.236823e-01
+#ENSMUSG00000025780  0.6013726  7.271208 12.404182 4.283733e-04 2.236823e-01
+#ENSMUSG00000061740  0.5970873  6.940286 10.106146 1.477756e-03 6.614016e-01
 
 # box plot of top differentially expressed genes across samples
 topTen <- rownames(topTags(de_glm, n = 10))
