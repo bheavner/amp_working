@@ -87,7 +87,7 @@ dim(d.full)
 keep <- rowSums(cpm(JNPL3)>100) >= 2
 d <- JNPL3[keep,]
 dim(d)
-#3133   24
+#3133   24 #seth says this is too stringent - 70% of genes in genome are expressed in brain - ~20k features normal
 
 # reset library sizes after filtering
 d$samples$lib.size <- colSums(d$counts)
@@ -212,7 +212,7 @@ ggplot(toPlot2, aes(factor(variable), value)) +
 fit <- glmFit(d2, design.mat) 
 # Andrew used fit <- glmFit(d2, design.mat, dispersion=dge$tagwise.dispersion) but since "If NULL will be extracted from y, with order of precedence: tagwise dispersion, trended dispersions, common dispersion.", I'll leave it out and let it get it from d2.
 de_glm  <- glmLRT(fit, contrast=c(-1,1)) # -1*JNPL3Minus 1*JNPL3Plus 
-#so... does this mean a positive LR means transgenic (JNPL3Plus) is higher expression than WT (JNPL3Minus), or lower?
+#so a positive logFC means transgenic (JNPL3Plus) is higher expression than WT (JNPL3Minus).
 
 summary(decideTestsDGE(de_glm, p.value=0.01))
 #[,1]
@@ -257,7 +257,57 @@ ggplot(toPlot2, aes(factor(variable), value)) +
   geom_boxplot(aes(fill = toPlot.samples.group)) +
   scale_x_discrete(labels = labels)
 
-## FINALLY, Build summary table with desired outputs
+
+# FOURTH, glm EDGER ANALYSIS WITH glmQLFTest TEST - see examples in ?glmQLFit for futher refinement
+
+QLFTfit <- glmQLFit(d2, design.mat) 
+de_glmQLFT  <- glmQLFTest(QLFTfit, contrast=c(-1,1)) # -1*JNPL3Minus 1*JNPL3Plus 
+#so a positive logFC means transgenic (JNPL3Plus) is higher expression than WT (JNPL3Minus).
+
+summary(decideTestsDGE(de_glmQLFT, p.value=0.01))
+#[,1]
+#-1    0
+#0  3133
+#1     0
+
+topTags(de_glmQLFT)
+#Coefficient:  -1*JNPL3Minus 1*JNPL3Plus 
+#logFC    logCPM         F       PValue       FDR
+#ENSMUSG00000061808 -5.7908017  7.346404 17.074116 0.0003596785 0.6418135
+#ENSMUSG00000013275  0.4216076  7.707029 17.831728 0.0004097117 0.6418135
+#ENSMUSG00000042109 -0.9309660  7.857690 14.350161 0.0008651960 0.9035530
+#ENSMUSG00000025780  0.6014224  7.271208 11.305397 0.0025171312 0.9998911
+#ENSMUSG00000079037  0.7948747 10.942642 20.396186 0.0026141586 0.9998911
+#ENSMUSG00000061740  0.5971518  6.940286  9.374968 0.0052459760 0.9998911
+#ENSMUSG00000020932  0.9282341 12.041424  9.028230 0.0060183845 0.9998911
+#ENSMUSG00000027479  0.3252075  7.901499 10.264608 0.0065121841 0.9998911
+#ENSMUSG00000031700  0.3239644  7.258742  9.930533 0.0071769211 0.9998911
+#ENSMUSG00000031596  0.4337531  7.173476  8.483408 0.0074956168 0.9998911
+
+# box plot of top differentially expressed genes across samples
+topTen <- rownames(topTags(de_glm, n = 10))
+toPlot <- d[topTen] #10 rows, 24 columns
+top <- topTags(de_glm, n=50)
+
+# get gene names for x axis labels
+ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
+geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"), 
+                   filters = "ensembl_gene_id", 
+                   values = rownames(top)[1:10], 
+                   ensembl)
+
+# get label order right for plot
+labels <- geneNames$external_gene_name[(order(match(geneNames$ensembl_gene_id, rownames(top)[1:10])))]
+
+# munge to use with ggplot and plot
+test  <- data.frame(toPlot$samples$group, t(toPlot$counts))
+toPlot2 <- melt(test)
+ggplot(toPlot2, aes(factor(variable), value)) + 
+  geom_boxplot(aes(fill = toPlot.samples.group)) +
+  scale_x_discrete(labels = labels)
+
+
+## FINALLY, Build summary table with desired outputs (using the glmLRT results here)
 top <- data.frame(topTags(de_glm, n=99)) # the 100th isn't in ensembl, so fix later..
 
 ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
@@ -287,4 +337,3 @@ top <- cbind(top, kurtosises)
 colnames(top)[9] <- "Count_Kurtosis"
 
 write.table(top, file="JNPL3_tg_vs_wt.tsv", quote=F)
-

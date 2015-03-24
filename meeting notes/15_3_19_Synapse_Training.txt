@@ -1,0 +1,19 @@
+AMP-AD Synapse Training
+
+Focus: query Synapse knowledge portal via R
+
+want to use synapse queries more:
+ampAd <- synQuery(‘select id, name, platform, disease from file where projectId ==\’syn2580853\’’)
+
+#look with
+ampAD[1:5,]
+
+questions:
+file name conventions doc
+required annotation doc
+clarity about what working versions to work with vs. released versions, and how to find them. How modify/correct released data?
+
+How set up provenance with multiple outputs?
+
+Is there a list that identifies synapse IDs of what’s been released, what’s created, what’s in progress, etc?
+
