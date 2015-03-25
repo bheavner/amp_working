@@ -32,3 +32,23 @@ covariates$Mouse_ID <- sub('^3', 'X3', covariates$Mouse_ID)
 write.table(covariates, file="Mouse_samples.txt", quote=F)
 
 # upload to synapse (provenance undefined)
+
+
+## later (3/24/15), discover one more:
+#in count data, sample “LP62_4”
+#in covariates, sample “LP_62_4”
+# fix: change covariates sample to match count data ID.
+covariatesFile <- synGet('syn2875343')
+
+# load covariates file to have handy
+covariates <- read.table(getFileLocation(covariatesFile), 
+                         header = TRUE, 
+                         stringsAsFactors = FALSE)
+
+# First, replace . with _
+covariates$Mouse_ID <- sub("LP_62_4", "LP62_4", covariates$Mouse_ID)
+
+# write the updated table
+write.table(covariates, file="Mouse_samples.txt", quote=F)
+
+# upload to synapse (provenance undefined)

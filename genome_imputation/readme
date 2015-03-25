@@ -1,0 +1,21 @@
+We are not required to do the imputation, but it is a task that will be very useful for future analysis in the consortia. It would be beneficial to run all genomic info from the consortia through a common pipeline, so if we can implement an imputation pipeline, it would likely get wide use. Genomic imputation is likely computationally intensive, so if we were imputing all genotype info across the consortia, we'd need to make sure we had the right Amazon resources available (we could likely use the reserved server Buruk suggested for the BDDS work).
+
+The current status of our genomic imputation pipeline is that James has implemented most of the pipeline, but it's not finalized and needs revision. His code is at https://github.com/jaeddy/ampSynapseProjects/tree/master/genomeImputing
+
+
+FROM JAMES (3/25/15):
+the readme is mostly reliable in terms of order of operations, but the setup has changed quite a bit
+i've moved away from the EBS dependency to instead using s3 push/pull for all intermediate steps
+and i've also included some downstream steps, involving qc, file merging, and file format conversion
+i think about 10% of the code (mostly early steps that i never needed to re-run in january) are still setup to look for EBS code/files
+and there was an issue with the final conversion to bed/bim/fam format with PLINK
+if i remember right, it had something to do with tri-allelic SNPs that caused plink (or some other step) to break; but i'm not 100%
+that detail probably isn't worth digging into until you've played around with everything else
+or now, it may or may not be useful to know that the main steps of the pipeline are executed with any script named "submit_"; in the following order:
+1. submit_preprocess
+2. submit_convert
+3. submit_prephase
+4. submit_chunkify
+5. submit_impute
+6. submit_qc
+merge_results would be the final step (if it worked). anything with rerun_ is designed to do the equivalent of submit_, but only for files it detects are missing or have problems
