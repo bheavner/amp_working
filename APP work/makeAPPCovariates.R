@@ -2,23 +2,13 @@
 # NOTE: I expect 128 samples in this group
 # This will go in the folder at syn3435792
 
-# Log in to synapse and grab Tau covariates to compare
-library(synapseClient)
+library(synapseClient) # for synapse upload
 library(RCurl) # to grab google doc covariates files
 
 #Login to Synapse using credentials saved in .synapseConfig file
 synapseLogin()
 
-# get the normalized readcount and covariates files from synapse
-covariatesFile <- synGet('syn2875343')
-
-# load Tau covariates file to have handy for comparison
-covariates <- read.table(getFileLocation(covariatesFile), 
-                         header = TRUE, 
-                         stringsAsFactors = FALSE)
-
-colnames(covariates)
-#  "Mouse_ID" "Experiment" "RIN" "Genotype" "Sex" "Age_months" "RLIMS.ID" "Seq.Run.ID" "Lane.Number" "Clusters" "Raw_RNAseq_file_name"
+# Tau covariates are:"Mouse_ID" "Experiment" "RIN" "Genotype" "Sex" "Age_months" "RLIMS.ID" "Seq.Run.ID" "Lane.Number" "Clusters" "Raw_RNAseq_file_name"
 
 # excel summary files on google drive - permissions are set to "anyone with link can view"
 
@@ -30,10 +20,11 @@ url2 <- getURL("https://docs.google.com/spreadsheets/d/1X_QRh-xw8q3lZ8IOosHdydxU
 
 rawCovariates1 <- read.csv(textConnection(url1))
 rawCovariates2 <- read.csv(textConnection(url2))
-#remove first row (all blanks)
+
+#remove first row ov rawCovariates2 (all blanks)
 rawCovariates2 <- rawCovariates2[2:129,]
 
-#rawCovariates1 has 188 observations. I think I want rawCovariates1$Request.ID == "REQ-000000002442" (that subset overlaps rawCovariates2)
+#rawCovariates1 has 188 observations. Those with rawCovariates1$Request.ID == "REQ-000000002442" overlaps the 128 observations in rawCovariates2. I'm not sure what the others are.
 
 ## Assemble APP covariates data frame
 APPCovariates = data.frame("Mouse_ID" = rawCovariates2$Mouse.ID)  
@@ -75,8 +66,44 @@ APPCovariates$Sex <- sub("Male", "M", APPCovariates$Sex)
 
 APPCovariates$Age_months <- sub("mo", "", APPCovariates$Age_months)
 
-#TODO:
-## Reformat IDs for consistency with readcount data
+# Reformat/rename IDs for consistency with readcount data
+# First, replace space and # with _
+APPCovariates$Mouse_ID <- sub("[#]", "_", APPCovariates$Mouse_ID)
+APPCovariates$Mouse_ID <- sub("[ ]", "_", APPCovariates$Mouse_ID)
 
+# next, replace - with . in all cases
+APPCovariates$Mouse_ID <- sub('-', '.', APPCovariates$Mouse_ID)
+
+# finally, I want to prepend all IDs that start with a number with "X". My regex-fu is weak:
+APPCovariates$Mouse_ID <- sub('^1', 'X1', APPCovariates$Mouse_ID)
+APPCovariates$Mouse_ID <- sub('^2', 'X2', APPCovariates$Mouse_ID)
+APPCovariates$Mouse_ID <- sub('^3', 'X3', APPCovariates$Mouse_ID)
+APPCovariates$Mouse_ID <- sub('^4', 'X4', APPCovariates$Mouse_ID)
+
+# then there's a weird one - WE have counts for both X181710 and X181710.1, but only covariate info for 181710
+# I'm not sure how to deal with that at the moment, but have emailed to find out.
+
+
+# TODO:
 # upload to synapse with correct file name, annotation, and provenance
-# confirm wiki descriptions needed
+# confirm wiki descriptions/study description
+
+#What are the annotations for this file?
+hbtrcAnnotations <- synGetAnnotations(hbtrcSyn)
+onWeb(hbtrcSyn)
+
+#Let's add an annotation to this file
+hbtrcAnnotations$dataContact <- "Minghui Wang <minghui.wang@mssm.edu>"
+synSetAnnotations(hbtrcSyn) <- hbtrcAnnotations
+
+#don't let the version change with forceVersion=T
+hbtrcSyn <- synStore(hbtrcSyn,forceVersion=T)
+onWeb(hbtrcSyn)
+
+#let's update the provenance
+act <- Activity(name='HBTRC Reference Data Migration',
+                used=list(list(entity=emoryTable@values$originalSynapseId[i],wasExecuted=F)),
+                executed=list("https://github.com/Sage-Bionetworks/ampAdScripts/blob/master/Emory/migrateEmoryFeb2015.R"))
+
+generatedBy(hbtrcSyn) <- act
+synStore(hbtrcsyn,forceVersion=T)
