@@ -9,20 +9,14 @@ library(edgeR)
 #Login to Synapse using credentials saved in .synapseConfig file
 synapseLogin()
 
-codeFile <- ("https://github.com/bheavner/ampSynapseProjects/blob/5c2fea4f6c4930e623df97eef96e6b0224aaeec1/rnaseqAnalysis/normalize_readcounts.R")
+codeFile <- ("https://github.com/TODO")
 
-# The files for the first batch are:
+# The files for this batch are:
 
-# ad_pilot_rnaseq_gene_id_counts_transposed.txt.gz ('syn3191070')
-# ad_pilot_rnaseq_transcript_id_counts_transposed.txt.gz ('syn3191083')
+# TAUAPPms_UFL-Mayo_ISB_IlluminaHiSeq2000_App_GeneCounts ('syn3483519')
+# TAUAPPms_UFL-Mayo_ISB_IlluminaHiSeq2000_App_TranscriptCounts ('syn3483625')
 
-# psp_pilot_rnaseq_gene_id_counts_transposed.txt.gz ('syn3191085')
-# psp_pilot_rnaseq_transcript_id_counts_transposed.txt.gz ('syn3191122')
-
-# mouse_tau_rnaseq_gene_id_counts_transposed.txt.gz ('syn3192634')
-# mouse_tau_rnaseq_transcript_id_counts_transposed.txt.gz ('syn3192651')
-
-countFileSynapseIDs <- c('syn3192634', 'syn3192651')#'syn3191070', 'syn3191083', 'syn3191085', 'syn3191122', 'syn3192634', 'syn3192651')
+countFileSynapseIDs <- c('syn3483519','syn3483625') 
 
 for (mergedCountFile in countFileSynapseIDs) {
     message("Normalizing ", mergedCountFile)
@@ -42,7 +36,7 @@ for (mergedCountFile in countFileSynapseIDs) {
     Counts <- read.table(localFilePath, header = TRUE)
 
     # make DGEList object
-    expr <- DGEList(Counts, group = rep(1, ncol(transposedCounts)))
+    expr <- DGEList(Counts, group = rep(1, ncol(Counts)))
 
     # calculate normalization factors
     normFactors <- calcNormFactors(expr, method = ("TMM"))
@@ -55,7 +49,7 @@ for (mergedCountFile in countFileSynapseIDs) {
 
     # write the data to local dir
 
-    newFileName <- sub('_transposed.txt.gz', '', originalCountFile$properties$name)
+    newFileName <- sub('_transposed.txt.gz', '', originalCountFile$properties$name) #legacy?
     newFileName <- paste0(newFileName, "_normalized.txt", sep="")
 
     write.table(normalizedCpm, newFileName, quote = FALSE, sep = "\t", row.names = TRUE)
