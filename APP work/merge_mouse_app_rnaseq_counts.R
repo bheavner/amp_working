@@ -13,7 +13,7 @@ synapseLogin()
 app_rnaseq_counts <- "syn3439202" # all count files in a zipped directory
 
 # Download files from Synapse
-app_count_files <- synGet(app_rnaseq_counts)
+app_count_files <- synGet(app_rnaseq_counts, downloadFile = F)
 app_files_path <- getFileLocation(app_count_files)
 
 # Get name of temporary directory to store unzipped files (same as name of
@@ -35,17 +35,12 @@ for (countType in countTypes) {
 
     # Create a Synapse object for the output file and upload
     # point to specific version run
-    codeFile <- ("TODO")
-}    
-#    merged_file_object <- File(path = merged_file,
-#                               parentId = app_count_files$properties$parentId)
+    codeFile <- ("TODO")    
+    merged_file_object <- File(path = merged_file,
+                               parentId = app_count_files$properties$parentId)
     
-#    merged_file_object <- synStore(merged_file_object,
-#                                   activityName="Build merged readcount file",
-#                                   used=list(list(name = "merge_mouse_app_rnaseq_counts.R",
-#                                                  url = codeFile, wasExecuted = T),
-#                                             list(entity=originalCountFile,
-#                                                  wasExecuted=F)))
-#}
+    merged_file_object <- synStore(merged_file_object,
+                                   activityName="Build merged readcount file")
+}
 
-unlink(inputDir, recursive = TRUE)
+#unlink(inputDir, recursive = TRUE)

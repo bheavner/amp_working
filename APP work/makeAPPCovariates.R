@@ -4,6 +4,7 @@
 
 library(synapseClient) # for synapse upload
 library(RCurl) # to grab google doc covariates files
+source("uploadToSynapse.R")
 
 #Login to Synapse using credentials saved in .synapseConfig file
 synapseLogin()
@@ -80,30 +81,10 @@ APPCovariates$Mouse_ID <- sub('^2', 'X2', APPCovariates$Mouse_ID)
 APPCovariates$Mouse_ID <- sub('^3', 'X3', APPCovariates$Mouse_ID)
 APPCovariates$Mouse_ID <- sub('^4', 'X4', APPCovariates$Mouse_ID)
 
-# then there's a weird one - WE have counts for both X181710 and X181710.1, but only covariate info for 181710
-# I'm not sure how to deal with that at the moment, but have emailed to find out.
+# Write covariates table to local file
+fileName <- "AMP-AD_TAUAPPms_UFL-Mayo-ISB_IlluminaHiSeq2000_App-Covariates.csv"
+write.table(APPCovariates, file = fileName, quote = FALSE, sep = ",")
 
-
-# TODO:
-# upload to synapse with correct file name, annotation, and provenance
-# confirm wiki descriptions/study description
-
-#What are the annotations for this file?
-hbtrcAnnotations <- synGetAnnotations(hbtrcSyn)
-onWeb(hbtrcSyn)
-
-#Let's add an annotation to this file
-hbtrcAnnotations$dataContact <- "Minghui Wang <minghui.wang@mssm.edu>"
-synSetAnnotations(hbtrcSyn) <- hbtrcAnnotations
-
-#don't let the version change with forceVersion=T
-hbtrcSyn <- synStore(hbtrcSyn,forceVersion=T)
-onWeb(hbtrcSyn)
-
-#let's update the provenance
-act <- Activity(name='HBTRC Reference Data Migration',
-                used=list(list(entity=emoryTable@values$originalSynapseId[i],wasExecuted=F)),
-                executed=list("https://github.com/Sage-Bionetworks/ampAdScripts/blob/master/Emory/migrateEmoryFeb2015.R"))
-
-generatedBy(hbtrcSyn) <- act
-synStore(hbtrcsyn,forceVersion=T)
+# upload to synapse with annotation, provenance, etc.
+APPCovariatesId <- "syn3483880"
+uploadToSynapse(fileName, APPCovariatesId)
