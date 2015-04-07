@@ -1,0 +1,48 @@
+15_4_8
+AMP-AD RNAseq working group meeting
+
+Agenda:
+1. Sample swap updates? (Sinai/Mayo, 5 min)
+2. Select alignment method (Sage + all, 15-20 min):   
+3. Select gene,exon, and transcript quant methods (all, 15-20 min)
+4. Start discussion on variant calling methods (10 min)
+
+Mariette sample swap update - have sent samples to Sinai, hope to get samples this week or next
+
+K’s bias is to use star for alignment (instead of gsnap or other aligner)
+Going with that for pipeline assembly (can revisit if needed)
+
+So star can produce BAM file. Next question: quanitation
+
+K proposed using straightforward counting methods such as feature counting in gene bins and exomes. For transcripts, a fast method such as Sailfish.
+
+Rsum is more traditional, but much slower, may require another alignment
+
+question: 1 pipeline, or a few different ways?
+
+Marietta - looking for things robust across things…
+
+
+
+Variant Calling:
+anything besides GATK?
+freebase a possibility (unknown performance with RNAseq)
+K - this could be a place where it’s worthwhile to run a few methods on a small fraction of the data: it’s much more emerging than alignment (many volunteers will help - Eric D, Gi Shu, Cory)
+
+Cory: considerations: 
+variant calling for different purposes: joint variant, variant calling for RNA/DNA differences (different than SNPs) What do we care about for endpoints?
+K proposed for RNA editing originally. Cory is saying it will take additional work. Cory reports we’ve observed that GATK sensitivity has changed over time, and it’s kind of weird. So we can run GATK with our pipeline for that.
+Gi Shu: in-house pipeline uses STAR
+
+Kristen: has run samtools then overlayed  other techniques
+
+Marietta - RB-boost
+
+Industry guy: Do we have SNP data? 
+
+Ben L: Rna-Seq - mayo pilot study has it. ROSMAP pilot has it. Others have it. 
+
+Industry guy: that’ll be useful for QC.
+
+Others interested in building pipeline, testing, QC? Kristin will be building on Sinai compute system.
+
