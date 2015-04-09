@@ -4,7 +4,7 @@
 
 library(synapseClient) # for synapse data exchange
 library(RCurl) # to grab google doc covariates files
-source("uploadToSynapse.R")
+source("uploadProvenanceToSynapse.R")
 
 #Login to Synapse using credentials saved in .synapseConfig file
 synapseLogin()
