@@ -18,6 +18,12 @@ uploadToSynapse <- function(file, synID) {
   # get info about current synapse object to modify
   metaDataOnly <- synGet(synID, downloadFile=F)
   
+  
+  # to clean up
+  metaDataOnly@filePath = '/Users/bheavner/foo/some_file_path.foo'
+# also change name in properties
+  synStore(metaDataOnly) # will version it this way, which you must to update file
+  
   # make a new object with the file for editing and upload
   objectAnnotations <- synGetAnnotations(metaDataOnly)
   objectProperties <- synGetProperties(metaDataOnly)
@@ -45,7 +51,7 @@ uploadToSynapse <- function(file, synID) {
   # objectAnnotations$dataSubType  <- "patient" # NOT SURE IF RIGHT
   objectAnnotations$fileType <- "csv"
   objectAnnotations$organism <- "Homo sapiens"
-  objectAnnotations$dataContact <- "Nilufer Ertekin-Taner, M.D., Ph.D. <Taner.Nilufer@mayo.edu>"
+  objectAnnotations$dataContact <- "Nilufer Ertekin-Taner, M.D., Ph.D. Taner.Nilufer@mayo.edu"
   
   synSetAnnotations(fileObject) <- objectAnnotations
   
