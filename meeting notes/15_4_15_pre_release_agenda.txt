@@ -1,0 +1,50 @@
+1) Problems identified by Nilufer
+
+2) Brief overview of Gantt Chart/spreadsheet I sent last night
+
+What (ideally) happens to data for release:
+We get hard drives
+Cory uploads to S3 buckets in AWS
+We run James’ scripts to process data from buckets with SNAPR across nodes
+I run scripts to collect SNAPR output and make headcount files (by gene ID and transcript ID)
+I run scripts to Normalize read counts
+I generate covariates file describing samples, etc.
+I confirm sample IDs are consistent across files (including covariates) and that all samples are present in all files.
+Ideally, I’d like to do a preliminary DE analysis to make sure the data is formatted as expected.
+I generate metadata and provenance annotation for files
+I confirm the files meet the standards defined by the consortium
+I upload the objects to Synapse “partner pages” and let SAGE know they’re ready to prep for public release
+SAGE reviews for annotation, metadata requirements (not data QC), then duplicates these to new synapse objects that are part of the “Knowledge Bank”
+
+
+I’ve encountered a range of technical challenges to this ideal workflow. I hope we can carefully consider them and engineer solutions as this project moves forward (but not on this call, which is more focused on the next release and data problems that Nilufer has identified)
+
+
+On the spreadsheet, Red means things I need to do or want to do for the next release. Grey means things for the next release
+
+
+
+3) Upcoming Data Release
+- deadline is 4/20 for having data deposited with appropriate metadata, annotation, and wiki descriptions
+
+- data targeted for release: confirm contents, current status update
+ -- UFL APP mouse data
+	— have sent to SAGE for feedback. I am aware of 2 minor issues (provenance on synapse pages and sig figs in normalized readcount data). At this point, if problems come up while fixing those, it wouldn’t be tragic to release what’s there.
+
+ -- Rush-Broad Sample Swap data
+	— 10 samples. Have processed with SNAPR and bundled output file for downstream headcount summary/normalizing.
+	— need to finalize covariates file
+		— key question: Covariates file: I’m basing it on U01_288_AUT_TCx_RNAseq_Covars-Drives_02-06-2015_1447.xlsx. Is this appropriate? Specifically, I have other data summary spreadsheets that have censored information (such as subject ages for people over a certain age).
+	— I’m not sure if this should include both transcript counts and gene counts (I didn’t have both on my spreadsheet at one point and am not sure why. I need to confirm with SAGE)
+
+	— most importantly, have written code to annotate and upload to synapse. That code can also be applied to larger may tcx data set.
+	
+
+ -- mayo tcx RNA-seq data
+	— 278 samples
+	— 271 have been run through snap and output bundled.
+	— need to confirm that source fastq file pairs for 7 unprocessed samples are on the hard drives we received from Mayo, then process with SNAPR. I’m not sure how to access the hard drives, and Cory is out sick. What do we do if we can’t run these 7 samples? (sample IDs are NA04-258, NA05-327, 05-18, 06-05, 06-15, 09-34, and 09-50
+
+	— I need to make covariates file (same question as Rush-Broad SS covariates)
+
+4) What’s the best way to debrief and learn from the first 2 releases as we prepare for the third? I expect the mayo cerebellum data will be very similar to the mayo temporal cortex data, and the Mt. Sinai sample swap data will be very similar to the rush-broad sample swap data.

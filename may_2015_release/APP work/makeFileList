@@ -1,0 +1,5 @@
+# commands to make .bam file list from s3 bucket
+aws s3 ls s3://ufl-u01-rnaseq/APP_Samples --recursive | grep -e ".fastq" -e ".bam$" | awk '{print $4}' > file_list
+
+# pull out .bam files
+grep .snap.bam file_list | grep -v "^$" > bam_files.txt
