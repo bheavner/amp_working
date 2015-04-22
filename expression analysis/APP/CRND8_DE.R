@@ -1,5 +1,7 @@
 # Goal: first-pass DE analysis of CRND8 APP mice (transgenic (+) vs wild type (-) ).
 
+# need to work on this script. JNPL3_DE_timepoints.R is best place to work from
+
 # output should be a table of top most differentially expressed genes, with the following columns: gene ID; logFc' logCPM; pValue' FDR' external_gene_name; mean gene level; sd; kurtosis; (I decided not to include 95% CI of effect size or SD of effect size - see https://support.bioconductor.org/p/61640/); histogram of values
 
 ## load libraries
@@ -98,15 +100,15 @@ orderedFemaleGenotype  <- covariates$Genotype[order(match(CRND8FemaleCovariates$
 CRND8Female  <- DGEList(counts = CRND8FemaleCounts, group = orderedFemaleGenotype)
 
 ## filter data 
-# require minimum of 100 counts per million for at least 2 samples
+# require minimum of 10 reads for at least 2 samples:
 d.full <- CRND8Female # keep the old one in case we mess up
 dim(d.full)
 #39179    46
 
-keep <- rowSums(cpm(CRND8Female)>100) >= 2
+keep <- rowSums(CRND8Female$counts>10) >= 2
 d <- CRND8Female[keep,]
 dim(d)
-#2729   46
+# 19096    46
 
 # reset library sizes after filtering
 d$samples$lib.size <- colSums(d$counts)
@@ -136,21 +138,23 @@ de.tgw <- exactTest(d1)
 summary(decideTestsDGE(de.tgw, p.value=0.01))
 # Here the entries for -1, 0 and 1 are for down-regulated, non-differentially expressed and up-regulated tags respectively.
 #   [,1]
-#-1    0
-#0  2729
-#1     0
+#-1    1
+#0  19091
+#1     4
 
 topTags(de.tgw)
 # Comparison of groups:  +-- 
-#   logFC   logCPM      PValue       FDR
-# ENSMUSG00000034730 -0.2109890 9.213325 0.003371372 0.9474738
-# ENSMUSG00000026185  0.2494932 8.110462 0.003544733 0.9474738
-# ENSMUSG00000040479 -0.1793679 9.135856 0.005921796 0.9474738
-# ENSMUSG00000044060  0.1529706 7.832681 0.007384821 0.9474738
-# ENSMUSG00000003352 -0.1527321 8.094938 0.008676303 0.9474738
-# ENSMUSG00000019254 -0.1526298 7.243193 0.010696263 0.9474738
-# ENSMUSG00000015094 -0.1493345 7.671115 0.010860216 0.9474738
-# ENSMUSG00000029361  0.1737343 7.039045 0.012108308 0.9474738
+# logFC    logCPM       PValue          FDR
+# ENSMUSG00000081229 -5.751528 -1.856062 2.128924e-08 0.0004065393
+# ENSMUSG00000076577  3.990990 -2.847054 9.064607e-08 0.0008654887
+# ENSMUSG00000094797  3.912699 -2.858676 1.418656e-07 0.0009030217
+# ENSMUSG00000076614  3.099937 -2.125991 1.235190e-06 0.0058967952
+# ENSMUSG00000009350  2.051351 -2.347369 1.915881e-06 0.0073171329
+# ENSMUSG00000044206 -4.209223 -1.360661 4.532389e-06 0.0144250828
+# ENSMUSG00000095079  3.073747  0.907008 6.589556e-06 0.0179763086
+# ENSMUSG00000076613  3.069206 -1.724823 8.165922e-06 0.0194920547
+# ENSMUSG00000015854 -3.573450 -1.191868 4.091067e-05 0.0868033497
+# ENSMUSG00000008193  1.930355 -2.413850 5.378482e-05 0.1027075014
 
 # box plot of top differentially expressed genes across samples
 topTen <- rownames(topTags(de.tgw, n = 10))
@@ -176,60 +180,11 @@ ggplot(toPlot2, aes(factor(variable), value)) +
 
 
 
-## NEXT, glm EDGER ANALYSIS WITH EXACT TEST
-# To compare, use GLM estimate of dispersion
-design.mat <- model.matrix(~0 + d$samples$group)
+# NEXT, glm EDGER ANALYSIS WITH glmLRT TEST
+
+design.mat <- model.matrix(~0 + group) 
 colnames(design.mat) <- levels(d$samples$group)
-d2 <- estimateGLMCommonDisp(d,design.mat)
-d2 <- estimateGLMTrendedDisp(d2,design.mat) #method = "power" also a possibility
-# You can change method to "auto", "bin.spline", "power", "spline", "bin.loess".
-# The default is "auto" which chooses "bin.spline" when > 200 tags and "power" otherwise.
-d2 <- estimateGLMTagwiseDisp(d2, design.mat)
-plotBCV(d2) # seems nice - blue line looks like it follows points...
 
-# Look at DE with exact test (same test as with simple model)
-de_common <- exactTest(d2) # DE with GLM dispersion estimate with exact Test.
-summary(decideTestsDGE(de_common, p.value=0.01))
-#[,1]
-#-1    1
-#0  3132
-#1     0
-
-topTags(de_common)
-#Comparison of groups:  CRND8Plus-CRND8Minus 
-#logFC    logCPM       PValue          FDR
-#ENSMUSG00000061808 -5.7919834  7.346404 1.967464e-08 6.164065e-05
-#ENSMUSG00000042109 -0.9310217  7.857690 2.548227e-05 3.991797e-02
-#ENSMUSG00000013275  0.4216278  7.707029 8.200863e-05 8.564435e-02
-#ENSMUSG00000079037  0.7948759 10.942642 2.462941e-04 1.929099e-01
-#ENSMUSG00000004187 -0.2979300  7.847129 3.920177e-04 2.344835e-01
-#ENSMUSG00000025780  0.6013726  7.271208 4.490588e-04 2.344835e-01
-#ENSMUSG00000061740  0.5970873  6.940286 1.551455e-03 6.943871e-01
-
-# box plot of top differentially expressed genes across samples
-topTen <- rownames(topTags(de_common, n = 10))
-toPlot <- d[topTen] #10 rows, 24 columns
-top <- topTags(de_common, n=50)
-
-# get gene names for x axis labels
-ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
-geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"), 
-                   filters = "ensembl_gene_id", 
-                   values = rownames(top)[1:10], 
-                   ensembl)
-
-# get label order right for plot
-labels <- geneNames$external_gene_name[(order(match(geneNames$ensembl_gene_id, rownames(top)[1:10])))]
-
-# munge to use with ggplot and plot
-test  <- data.frame(toPlot$samples$group, t(toPlot$counts))
-toPlot2 <- melt(test)
-ggplot(toPlot2, aes(factor(variable), value)) + 
-  geom_boxplot(aes(fill = toPlot.samples.group)) +
-  scale_x_discrete(labels = labels)
-
-
-# THIRD, glm EDGER ANALYSIS WITH glmLRT TEST
 fit <- glmFit(d2, design.mat) 
 # Andrew used fit <- glmFit(d2, design.mat, dispersion=dge$tagwise.dispersion) but since "If NULL will be extracted from y, with order of precedence: tagwise dispersion, trended dispersions, common dispersion.", I'll leave it out and let it get it from d2.
 de_glm  <- glmLRT(fit, contrast=c(-1,1)) # -1*CRND8Minus 1*CRND8Plus 
@@ -279,57 +234,9 @@ ggplot(toPlot2, aes(factor(variable), value)) +
   scale_x_discrete(labels = labels)
 
 
-# FOURTH, glm EDGER ANALYSIS WITH glmQLFTest TEST - see examples in ?glmQLFit for futher refinement
-
-QLFTfit <- glmQLFit(d2, design.mat) 
-de_glmQLFT  <- glmQLFTest(QLFTfit, contrast=c(-1,1)) # -1*CRND8Minus 1*CRND8Plus 
-#so a positive logFC means transgenic (CRND8Plus) is higher expression than WT (CRND8Minus).
-
-summary(decideTestsDGE(de_glmQLFT, p.value=0.01))
-#[,1]
-#-1    0
-#0  3133
-#1     0
-
-topTags(de_glmQLFT)
-#Coefficient:  -1*CRND8Minus 1*CRND8Plus 
-#logFC    logCPM         F       PValue       FDR
-#ENSMUSG00000061808 -5.7908017  7.346404 17.074116 0.0003596785 0.6418135
-#ENSMUSG00000013275  0.4216076  7.707029 17.831728 0.0004097117 0.6418135
-#ENSMUSG00000042109 -0.9309660  7.857690 14.350161 0.0008651960 0.9035530
-#ENSMUSG00000025780  0.6014224  7.271208 11.305397 0.0025171312 0.9998911
-#ENSMUSG00000079037  0.7948747 10.942642 20.396186 0.0026141586 0.9998911
-#ENSMUSG00000061740  0.5971518  6.940286  9.374968 0.0052459760 0.9998911
-#ENSMUSG00000020932  0.9282341 12.041424  9.028230 0.0060183845 0.9998911
-#ENSMUSG00000027479  0.3252075  7.901499 10.264608 0.0065121841 0.9998911
-#ENSMUSG00000031700  0.3239644  7.258742  9.930533 0.0071769211 0.9998911
-#ENSMUSG00000031596  0.4337531  7.173476  8.483408 0.0074956168 0.9998911
-
-# box plot of top differentially expressed genes across samples
-topTen <- rownames(topTags(de_glm, n = 10))
-toPlot <- d[topTen] #10 rows, 24 columns
-top <- topTags(de_glm, n=50)
-
-# get gene names for x axis labels
-ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
-geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"), 
-                   filters = "ensembl_gene_id", 
-                   values = rownames(top)[1:10], 
-                   ensembl)
-
-# get label order right for plot
-labels <- geneNames$external_gene_name[(order(match(geneNames$ensembl_gene_id, rownames(top)[1:10])))]
-
-# munge to use with ggplot and plot
-test  <- data.frame(toPlot$samples$group, t(toPlot$counts))
-toPlot2 <- melt(test)
-ggplot(toPlot2, aes(factor(variable), value)) + 
-  geom_boxplot(aes(fill = toPlot.samples.group)) +
-  scale_x_discrete(labels = labels)
-
 
 ## FINALLY, Build summary table with desired outputs (using the glmLRT results here)
-top <- data.frame(topTags(de_glm, n=99)) # the 100th isn't in ensembl, so fix later..
+top <- data.frame(topTags(de.tgw, n=50)) # some aren't in ensembl, so fix later..
 
 ensembl=useMart("ensembl", dataset="mmusculus_gene_ensembl")
 geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"), 
@@ -341,20 +248,20 @@ geneNames <- getBM(c("ensembl_gene_id", "external_gene_name"),
 names <- geneNames$external_gene_name[(order(match(geneNames$ensembl_gene_id, rownames(top))))]
 
 top <- cbind(top, names)
-colnames(top)[6] <- "Gene_Name"
+colnames(top)[5] <- "Gene_Name"
 
 ## add mean gene level, SD, kurtosis, 95% CI of effect size or SD of effect size to summary table
 
-means <- rowMeans(d2$counts[rownames(top), ])
+means <- rowMeans(d1$counts[rownames(top), ])
 top <- cbind(top, means)
-colnames(top)[7] <- "Mean_count"
+colnames(top)[6] <- "Mean_count"
 
-stdevs <- apply(d2$counts[rownames(top), ], 1, sd)
+stdevs <- apply(d1$counts[rownames(top), ], 1, sd)
 top <- cbind(top, stdevs)
-colnames(top)[8] <- "Count_Std_Dev"
+colnames(top)[7] <- "Count_Std_Dev"
 
-kurtosises  <- apply(d2$counts[rownames(top), ], 1, kurtosis)
+kurtosises  <- apply(d1$counts[rownames(top), ], 1, kurtosis)
 top <- cbind(top, kurtosises)
-colnames(top)[9] <- "Count_Kurtosis"
+colnames(top)[8] <- "Count_Kurtosis"
 
-write.table(top, file="CRND8_tg_vs_wt.tsv", quote=F)
+write.table(top, file="CRND8_Female_tg_vs_wt.tsv", quote=F)
