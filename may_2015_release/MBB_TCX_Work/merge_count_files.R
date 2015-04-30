@@ -36,10 +36,11 @@ create_merged_file <- function(dir = "", countType = countTypes, prefix = "") {
             rownames(countDat) <- row.names(tmpDat)
             countDat[, 1] <- tmpDat
         } else {
-            countDat[, i] <- as.matrix(read.table(filePath, row.names = 1))
+          #message(paste(filePath)) # bug hunting
+            countDat[, i] <- as.matrix(read.table(filePath, row.names = 1, check.names = FALSE))
         }   
     }
-    colnames(countDat) <- sample
+    colnames(countDat) <- sample#as.character(sample)
     #countDat <- t(countDat)
     
     message("Writing file...")
