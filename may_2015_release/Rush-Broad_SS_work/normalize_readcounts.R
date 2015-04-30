@@ -13,10 +13,10 @@ codeFile <- ("https://github.com/PriceLab/AMP-ad/Rush-Broad_SS/normalize_readcou
 
 # The files to normalize are:
 
-# AMP-AD_SampleSwap_UFL-Mayo-ISB_IlluminaHiSeq2000_dIPFC_Rush-Broad-SS_GeneCounts.txt.gz ('syn3620839')
-# AMP-AD_SampleSwap_UFL-Mayo-ISB_IlluminaHiSeq2000_dIPFC_Rush-Broad-SS_TranscriptCounts.txt.gz ('syn3620844')
+# AMP-AD_SampleSwap_UFL-Mayo-ISB_IlluminaHiSeq2000_dIPFC_Rush-Broad-SS_GeneCounts.txt.gz ('syn3801377')
+# AMP-AD_SampleSwap_UFL-Mayo-ISB_IlluminaHiSeq2000_dIPFC_Rush-Broad-SS_TranscriptCounts.txt.gz ('syn3801548')
 
-countFileSynapseIDs <- c('syn3620839', 'syn3620844')
+countFileSynapseIDs <- c('syn3801377', 'syn3801548')
 
 for (mergedCountFile in countFileSynapseIDs) {
     message("Normalizing ", mergedCountFile)
