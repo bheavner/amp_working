@@ -13,10 +13,10 @@ codeFile <- ("https://github.com/PriceLab/AMP-ad/tree/0.2/MBB/TCX/normalize_read
 
 # The files to normalize are:
 
-# AMP-AD_MSBB_UFL-Mayo-ISB_IlluminaHiSeq2000_TCX_GeneCounts.txt.gz ('syn3667936')
-# AMP-AD_MSBB_UFL-Mayo-ISB_IlluminaHiSeq2000_TCX_TranscriptCounts.txt.gz ('syn3667937')
+# AMP-AD_MayoBB_UFL-Mayo-ISB_IlluminaHiSeq2000_TCX_GeneCounts.txt.gz ('syn3818244')
+# AMP-AD_MayoBB_UFL-Mayo-ISB_IlluminaHiSeq2000_TCX_TranscriptCounts.txt.gz ('syn3818611')
 
-countFileSynapseIDs <- c('syn3667936', 'syn3667937')
+countFileSynapseIDs <- c('syn3818244', 'syn3818611')
 
 for (mergedCountFile in countFileSynapseIDs) {
     message("Normalizing ", mergedCountFile)

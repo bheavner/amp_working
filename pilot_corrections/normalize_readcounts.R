@@ -13,10 +13,10 @@ codeFile <- ("https://github.com/PriceLab/AMP-ad/pilotCorrections/normalize_read
 
 # The files to normalize are:
 
-# AMP-AD_MayoPilot_UFL-Mayo-ISB_IlluminaHiSeq2000_TemporalCortex_ProgressiveSupranuclearPalsy_gene_id_counts_UpdatedID_transposed.txt.gz ('syn3583369')
-# AMP-AD_MayoPilot_UFL-Mayo-ISB_IlluminaHiSeq2000_TemporalCortex_ProgressiveSupranuclearPalsy_transcript_id_counts_UpdatedID_transposed.txt.gz ('syn3583368')
+# AMP-AD_MayoPilot_UFL-Mayo-ISB_IlluminaHiSeq2000_TemporalCortex_Alzheimer_GeneCounts_UpdatedID.txt.gz ('syn3848699')
+# AMP-AD_MayoPilot_UFL-Mayo-ISB_IlluminaHiSeq2000_TemporalCortex_Alzheimer_TranscriptCounts_UpdatedID.txt.gz ('syn3848926')
 
-countFileSynapseIDs <- c('syn3583369', 'syn3583368')
+countFileSynapseIDs <- c('syn3848699', 'syn3848926')
 
 for (mergedCountFile in countFileSynapseIDs) {
     message("Normalizing ", mergedCountFile)
@@ -33,7 +33,7 @@ for (mergedCountFile in countFileSynapseIDs) {
 
     localFilePath <- sub('.gz', '', localFilePath) #trim the .gz suffix
 
-    transposedCounts <- read.table(localFilePath, header = TRUE)
+    transposedCounts <- read.table(localFilePath, header = TRUE, check.names = FALSE)
 
     # make DGEList object
     expr <- DGEList(transposedCounts, group = rep(1, ncol(transposedCounts)))

@@ -13,11 +13,11 @@ codeFile <- ("https://github.com/TODO")
 
 # The files for this batch are:
 
-# AMP-AD_TAUAPPms_UFL-Mayo-ISB_IlluminaHiSeq2000_Tau_GeneCount_Updated.txt.gz - syn3772907
-# AMP-AD_TAUAPPms_UFL-Mayo-ISB_IlluminaHiSeq2000_Tau_TranscriptCounts_Updated.txt.gz - syn3772915
+# AMP-AD_TAUAPPms_UFL-Mayo-ISB_IlluminaHiSeq2000_Tau_GeneCounts_Updated.txt.gz - syn3910122
+# AMP-AD_TAUAPPms_UFL-Mayo-ISB_IlluminaHiSeq2000_Tau_TranscriptCounts_Updated.txt.gz - syn3910523
 
 
-countFileSynapseIDs <- c('syn3772915') #'syn3772907',
+countFileSynapseIDs <- c('syn3910122', 'syn3910523')
 
 for (mergedCountFile in countFileSynapseIDs) {
     message("Normalizing ", mergedCountFile)
@@ -34,7 +34,7 @@ for (mergedCountFile in countFileSynapseIDs) {
 
     localFilePath <- sub('.gz', '', localFilePath) #trim the .gz suffix
 
-    Counts <- read.table(localFilePath, header = TRUE)
+    Counts <- read.table(localFilePath, header = TRUE, check.names = FALSE)
 
     # make DGEList object
     expr <- DGEList(Counts, group = rep(1, ncol(Counts)))
@@ -53,8 +53,8 @@ for (mergedCountFile in countFileSynapseIDs) {
     newFileName <- sub('_transposed.txt.gz', '', originalCountFile$properties$name) #legacy?
     newFileName <- paste0(newFileName, "_normalized.txt", sep="")
 
-    write.table(normalizedCpm, newFileName, quote = FALSE, sep = "\t", row.names = TRUE)
-
+    write.table(format(normalizedCpm, scientific = FALSE, digits = 5), newFileName, quote = FALSE, sep = "\t", row.names = TRUE, col.names = NA)    
+    
     # package it up, then create a Synapse object for the output file and upload with provenance
 
     gzip(newFileName)

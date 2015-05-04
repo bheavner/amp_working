@@ -4,7 +4,7 @@
 
 library(synapseClient)
 library(tools)
-source("dataEnablement/R/merge_count_files.R")
+source("merge_count_files.R")
 
 # Login to Synapse using credentials saved in .synapseConfig file
 synapseLogin()
@@ -23,9 +23,9 @@ tmpDir <- tempdir()
 unzip(ad_files_path, exdir = tmpDir)
 
 inputDir <- file.path(tmpDir, fileDir)
-prefix <- "ad_pilot_rnaseq"
+prefix <- "AMP-AD_MayoPilot_UFL-Mayo-ISB_IlluminaHiSeq2000_TemporalCortex_Alzheimer"
 
-countTypes <- c("gene_name", "gene_id", "transcript_id")
+countTypes <- c("gene_id", "transcript_id")
 
 for (countType in countTypes) {
     message(paste("Merging", prefix, "files of count type", countType, "..."))

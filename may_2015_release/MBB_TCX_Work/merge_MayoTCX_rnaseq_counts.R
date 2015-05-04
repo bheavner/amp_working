@@ -26,7 +26,7 @@ inputDir <- paste(tmpDir, '/tmp/tcx', sep = "")
 
 #inputDir <- file.path(tmpDir, fileDir)
 
-prefix <- "AMP-AD_MSBB_UFL-Mayo-ISB_IlluminaHiSeq2000_TCX"
+prefix <- "AMP-AD_MayoBB_UFL-Mayo-ISB_IlluminaHiSeq2000_TCX"
 
 countTypes <- c("gene_id", "transcript_id") #  
 

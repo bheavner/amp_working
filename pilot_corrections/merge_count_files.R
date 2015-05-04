@@ -36,7 +36,7 @@ create_merged_file <- function(dir = "", countType = countTypes, prefix = "") {
             rownames(countDat) <- row.names(tmpDat)
             countDat[, 1] <- tmpDat
         } else {
-            countDat[, i] <- as.matrix(read.table(filePath, row.names = 1))
+            countDat[, i] <- as.matrix(read.table(filePath, row.names = 1, check.names = FALSE))
         }   
     }
     colnames(countDat) <- sample
