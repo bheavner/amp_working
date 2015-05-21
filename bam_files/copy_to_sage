@@ -18,13 +18,14 @@ TARGETDIR=$2
 FILE_LIST=`mktemp s3-bucket-contents.XXXXXXXX`
 aws s3 ls ${BUCKET} --recursive \
     | grep -e ".snap\.bam$" \
+    | awk '{print $4}' \
     > $FILE_LIST ;
 
 # Copy .snap.bam files to Sage's bucket
 cat ${FILE_LIST} | while read line
 do
-    echo ${line}$ ${TARGETDIR}
-    aws --region us-east-1 s3 cp ${BUCKET}${SOURCEFILE} \
+    echo ${line} ${TARGETDIR}
+    aws --region us-east-1 s3 cp ${BUCKET}${line} \
         ${TARGETDIR} \
         --grants full=emailaddress=kristen.dang@sagebase.org \
         --source-region us-west-2 --dryrun

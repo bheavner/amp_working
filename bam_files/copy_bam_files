@@ -9,7 +9,7 @@
 # TARGETDIR="s3://u01-amp-ad/SNAPR-output/Rush-Broad-sample-swap/"
 
 # usage
-# ./copyBamFiles samples.txt s3://mayo-u01-rnaseq/ \
+# ./copy_bam_files samples.txt s3://mayo-u01-rnaseq/ \
 #                s3://u01-amp-ad/SNAPR-output/Rush-Broad-sample-swap
 
 SAMPLELIST=$1
