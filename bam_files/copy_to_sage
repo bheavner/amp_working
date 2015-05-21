@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# This script takes an S3 bucket and copies it to Sage's S3 bucket
+
+######## Specify inputs #######################################################
+
+# BUCKET="s3://u01-amp-ad/SNAPR-output/Rush-Broad-sample-swap/"
+# TARGETDIR="s3://amp-alzheimers-mayo/Rush-Broad-sample-swap/"
+
+# usage
+# ./copy_to_sage s3://u01-amp-ad/SNAPR-output/Rush-Broad-sample-swap/ \
+#                s3://amp-alzheimers-mayo/Rush-Broad-sample-swap/
+
+BUCKET=$1
+TARGETDIR=$2
+
+# Get full list of all *.snap.bam files from S3 bucket
+FILE_LIST=`mktemp s3-bucket-contents.XXXXXXXX`
+aws s3 ls ${BUCKET} --recursive \
+    | grep -e ".snap\.bam$" \
+    > $FILE_LIST ;
+
+# Copy .snap.bam files to Sage's bucket
+cat ${FILE_LIST} | while read line
+do
+    echo ${line}$ ${TARGETDIR}
+    aws --region us-east-1 s3 cp ${BUCKET}${SOURCEFILE} \
+        ${TARGETDIR} \
+        --grants full=emailaddress=kristen.dang@sagebase.org \
+        --source-region us-west-2 --dryrun
+done
+
