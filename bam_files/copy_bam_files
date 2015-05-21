@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# This script takes a list of sample IDs and copies the snapr-generated .bam files to a specified S3 bucket
+
+######## Specify inputs #######################################################
+
+# SAMPLELIST="samples.txt"
+# BUCKET="s3://mayo-u01-rnaseq/"
+# TARGETDIR="s3://u01-amp-ad/SNAPR-output/Rush-Broad-sample-swap/"
+
+# usage
+# ./copyBamFiles samples.txt s3://mayo-u01-rnaseq/ \
+#                s3://u01-amp-ad/SNAPR-output/Rush-Broad-sample-swap
+
+SAMPLELIST=$1
+BUCKET=$2
+TARGETDIR=$3
+
+# Get full list of all *.snap.bam files from S3 bucket
+FILE_LIST=`mktemp s3-bucket-contents.XXXXXXXX`
+aws s3 ls ${BUCKET} --recursive \
+    | grep -e ".snap\.bam$" \
+    | awk '{print $4}' \
+    > $FILE_LIST ;
+
+# find .bam file corresponding to each sample in SAMPLELIST (warn if more than 1)
+cat ${SAMPLELIST} | while read line
+do
+    SOURCEFILE=`grep ${line} ${FILE_LIST}`
+    echo ${BUCKET}${SOURCEFILE} ${TARGETDIR}
+    aws s3 cp ${BUCKET}${SOURCEFILE} ${TARGETDIR}
+done
+
