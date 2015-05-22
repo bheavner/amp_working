@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # This script takes an S3 bucket and copies it to Sage's S3 bucket
+# NOTE: it does not work recursively, so doesn't dig into sub-folders
 
 ######## Specify inputs #######################################################
 
@@ -16,18 +17,17 @@ TARGETDIR=$2
 
 # Get full list of all *.snap.bam files from S3 bucket
 FILE_LIST=`mktemp s3-bucket-contents.XXXXXXXX`
-aws s3 ls ${BUCKET} --recursive \
+aws s3 ls ${BUCKET} \
     | grep -e ".snap\.bam$" \
     | awk '{print $4}' \
     > $FILE_LIST ;
 
 # Copy .snap.bam files to Sage's bucket
-cat ${FILE_LIST} | while read line
+while read line
 do
     echo ${line} ${TARGETDIR}
     aws --region us-east-1 s3 cp ${BUCKET}${line} \
         ${TARGETDIR} \
         --grants full=emailaddress=kristen.dang@sagebase.org \
         --source-region us-west-2 --dryrun
-done
-
+done < ${FILE_LIST}
