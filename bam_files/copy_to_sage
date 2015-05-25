@@ -29,5 +29,5 @@ do
     aws --region us-east-1 s3 cp ${BUCKET}${line} \
         ${TARGETDIR} \
         --grants full=emailaddress=kristen.dang@sagebase.org \
-        --source-region us-west-2 --dryrun
+        --source-region us-west-2 
 done < ${FILE_LIST}

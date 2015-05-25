@@ -23,11 +23,21 @@ aws s3 ls ${BUCKET} --recursive \
     | awk '{print $4}' \
     > $FILE_LIST ;
 
-# find .bam file corresponding to each sample in SAMPLELIST (warn if more than 1)
+# add location for keeping track of what's copied
+COPIEDFILES=`mktemp s3-target-contents.XXXXXXXX`
+
+# find .bam file corresponding to each sample in SAMPLELIST, copy if not already copied (TODO: warn if more than 1)
 while read -r line
 do
     SOURCEFILE=`grep ${line} ${FILE_LIST}`
     echo ${BUCKET}${SOURCEFILE} ${TARGETDIR}
-    aws s3 cp ${BUCKET}${SOURCEFILE} ${TARGETDIR}
+    # Get list of files in target S3 bucket  
+    aws s3 ls ${TARGETDIR} --recursive \
+        | awk '{print $4}' \
+        > $COPIEDFILES ;
+    if [[ ! -n `grep ${line} ${COPIEDFILES}` ]]
+      then
+        aws s3 cp ${BUCKET}${SOURCEFILE} ${TARGETDIR} --dryrun
+    fi
 done < ${SAMPLELIST}
 
