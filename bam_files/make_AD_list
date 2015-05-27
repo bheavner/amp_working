@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# This script takes a mapping of sample IDs and a list of .bam files to produce a tab-delimited list of target/destination copies for subsequent S3 copying.
+
+######## Specify inputs #######################################################
+
+# BAMFILES="all_bam_files.txt"
+# KEY="AD_key.txt"
+# TARGETDIR="s3://u01-amp-ad/SNAPR-output/Mayo-Pilot/AD/"
+
+# usage
+# ./make_AD_list all_bam_files.txt AD_key.txt \
+#                s3://u01-amp-ad/SNAPR-output/Mayo-Pilot/AD/
+
+BAMFILES=$1
+KEY=$2
+TARGETDIR=$3
+
+# read the key file; grep all_bam_files for the old sample ID, write tab delimited output
+while read -r NEWID OLDID
+do
+    SOURCEFILE=`grep ${OLDID} ${BAMFILES}`
+    TRIMMEDFILENAME=`basename "${SOURCEFILE}"`
+    NEWFILENAME=${TRIMMEDFILENAME/$OLDID/$NEWID}
+
+    echo  -e "${SOURCEFILE}\t${NEWFILENAME}" >> AD_to_copy.txt
+done < ${KEY}
