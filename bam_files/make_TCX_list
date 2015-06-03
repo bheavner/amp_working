@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# This script takes a mapping of sample IDs and a list of .bam files to produce a tab-delimited list of target/destination copies for subsequent S3 copying.
+
+######## Specify inputs #######################################################
+
+# BAMFILES="all_bam_files.txt"
+# KEY="TCX_key.txt"
+# TARGETDIR="s3://u01-amp-ad/SNAPR-output/TCX/"
+
+# usage
+# ./make_TCX_list all_bam_files.txt TCX_key.txt \
+#                s3://u01-amp-ad/SNAPR-output/TCX/
+
+BAMFILES=$1
+KEY=$2
+TARGETDIR=$3
+
+# read the key file; grep all_bam_files for the old sample ID, write tab delimited output
+while read -r OLDID NEWID
+do
+    SOURCEFILE=`grep ${OLDID} ${BAMFILES}`
+#    echo -e "$SOURCEFILE\n"
+    for SOURCE in `echo $SOURCEFILE`
+    do
+        TRIMMEDFILENAME=`basename "${SOURCE}"`
+        NEWFILENAME=${TRIMMEDFILENAME/$OLDID/$NEWID}
+        echo -e "${SOURCE}\t${NEWFILENAME}" >> TCX_to_copy.txt
+    done
+
+#    echo -e "${SOURCEFILE}\t${NEWFILENAME}"
+#    echo  -e "${SOURCEFILE}\t${NEWFILENAME}" >> TCX_to_copy.txt
+done < ${KEY}
