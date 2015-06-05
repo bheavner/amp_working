@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# This script takes a list of sample IDs and .bam files to produce a tab-delimited list of target/destination files for subsequent s3 copying
+
+######## Specify inputs #######################################################
+
+# SAMPLELIST="Tau_IDs.txt"
+# BAMFILES="UFL_bam_files.txt"
+# BUCKET="s3://ufl-u01-rnaseq/"
+# TARGETDIR="s3://u01-amp-ad/SNAPR-output/UFL/TAU/"
+
+# usage
+# ./make_TAU_list UFL_bam_files.txt Tau_IDs.txt
+
+BAMFILES=$1
+SAMPLELIST=$2
+
+# grep $BAMFILES for members of $SAMPLELIST, write tab delimited output
+while read -r SAMPLEID
+do
+    SOURCEFILE=`grep ${SAMPLEID} ${BAMFILES}`
+#    echo ${SAMPLEID}
+#    echo ${SOURCEFILE}
+    for SOURCE in `echo $SOURCEFILE`
+    do
+        TRIMMEDFILENAME=`basename "${SOURCE}"`
+        echo -e "${SOURCE}\t${TRIMMEDFILENAME}" >> TAU_to_copy.txt
+    done
+done < ${SAMPLELIST}
+

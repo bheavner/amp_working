@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script takes a file listing source and target file names, and copies from source to destination.
+
+######## Specify inputs #######################################################
+
+# FILELIST="TAU_to_copy.txt"
+# SOURCEBUCKET="s3://UFL-u01-rnaseq/"
+# TARGETDIR="s3://u01-amp-ad/SNAPR-output/UFL/TAU/"
+
+# usage
+# ./copy_TAU_files TAU_to_copy.txt s3://UFL-u01-rnaseq/ \
+#                s3://u01-amp-ad/SNAPR-output/UFL/TAU/
+
+FILELIST=$1
+SOURCEBUCKET=$2
+TARGETDIR=$3
+
+# add location for keeping track of what's copied
+COPIEDFILES=`mktemp s3-target-contents.XXXXXXXX`
+
+# copy if not already copied
+while read -r SOURCE TARGET
+do
+    echo ${SOURCEBUCKET}${SOURCE} ${TARGETDIR}${TARGET}
+    # Get list of files in target S3 bucket  
+    aws s3 ls ${TARGETDIR} --recursive \
+        | awk '{print $4}' \
+        > $COPIEDFILES ;
+    if [[ ! -n `grep ${TARGET} ${COPIEDFILES}` ]]
+      then
+        aws s3 cp ${SOURCEBUCKET}${SOURCE} ${TARGETDIR}${TARGET} --dryrun
+    fi
+done < ${FILELIST}
+
