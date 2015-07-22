@@ -27,7 +27,7 @@ do
     aws s3 ls ${TARGETDIR} --recursive \
         | awk '{print $4}' \
         > $COPIEDFILES ;
-    if [[ ! -n `grep ${SOURCE} ${COPIEDFILES}` ]]
+    if [[ ! -n `grep ${TARGET} ${COPIEDFILES}` ]]
       then
         aws s3 cp ${SOURCEBUCKET}${SOURCE} ${TARGETDIR}${TARGET} --dryrun
     fi
